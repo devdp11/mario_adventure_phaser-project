@@ -24,3 +24,17 @@ window.onload = function() {
     };
     game = new Phaser.Game(gameConfig);
 };
+
+class PreloadGame extends Phaser.Scene {
+    constructor() {
+        super("PreloadGame");
+    }
+    preload() {
+        this.load.tilemapTiledJSON("level", "assets/level.json");
+        this.load.image("tile", "assets/tile.png");
+        this.load.image("mario", "assets/mario.png");
+    }
+    create() {
+        this.scene.start("PlayGame");
+    }
+}
