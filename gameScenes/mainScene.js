@@ -38,3 +38,29 @@ class PreloadGame extends Phaser.Scene {
         this.scene.start("PlayGame");
     }
 }
+
+var jumpButton;
+var runButton;
+var result;
+
+class PlayGame extends Phaser.Scene {
+    constructor() {
+        super("PlayGame");
+    }
+    create() {
+        // cria um objeto de teclas de seta
+        this.cursors = this.input.keyboard.createCursorKeys();
+    
+        // cria o tilemap
+        this.map = this.make.tilemap({ key: "level" });
+        const tile = this.map.addTilesetImage("tileset01", "tile");
+        
+        this.map.setCollisionBetween(16, 17);
+        this.map.setCollisionBetween(27, 28);
+        this.map.setCollisionBetween(21, 22);
+        this.map.setCollision(40);
+
+        this.layer = this.map.createStaticLayer("layer01", tile);
+    
+    }
+}
