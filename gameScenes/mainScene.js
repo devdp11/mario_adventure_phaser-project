@@ -46,7 +46,6 @@ var coin;
 var jumpButton;
 var runButton;
 var result;
-var shiftCooldown = 10;
 let addCollider = true;
 
 
@@ -57,9 +56,6 @@ class PlayGame extends Phaser.Scene {
     create() {
         // codigo de implementação de logo no background do mapa
         var logo = this.add.image(500, 400, "logo");
-
-        //codigo teste para implementação da moeda no jogo
-        var coin = this.add.image(100, 100, "coin");
 
         // cria um objeto de teclas de seta
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -74,7 +70,10 @@ class PlayGame extends Phaser.Scene {
         this.map.setCollision(40);
 
         this.layer = this.map.createStaticLayer("layer01", tile);
-    
+        
+        //codigo teste para implementação da moeda no jogo
+        this.coin = this.physics.add.sprite(100, 100, "coin");
+
         // cria o sprite do personagem e as coordenadas 
         this.mario = this.physics.add.sprite(90, 150, "mario");
 
@@ -88,6 +87,8 @@ class PlayGame extends Phaser.Scene {
         this.cameras.main.startFollow(this.mario);
 
         this.physics.add.collider(this.mario, this.layer);
+
+        this.physics.add.collider(this.mario, this.coin, this.getcoin, null, this);
 
        // this.anims.create({
        //     key: 'left',
@@ -113,8 +114,6 @@ class PlayGame extends Phaser.Scene {
 
     update(){
         
-        shiftCooldown -= 1;
-
         // codigo para movimentar o mario | falta as animações
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
@@ -141,4 +140,12 @@ class PlayGame extends Phaser.Scene {
         }
 
     }
+}
+
+function getcoin(mario, coin){
+    coin.disableBody(true, true);
+}
+
+function raiseResult(coin, result){
+
 }
