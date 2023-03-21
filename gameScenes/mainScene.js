@@ -30,7 +30,7 @@ class PreloadGame extends Phaser.Scene {
         super("PreloadGame");
     }
     preload() {
-
+        this.load.image("coin", "assets/coin.png");
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
         this.load.image("mario", "assets/mario.png");
@@ -42,6 +42,7 @@ class PreloadGame extends Phaser.Scene {
     }
 }
 
+var coin;
 var jumpButton;
 var runButton;
 var result;
@@ -54,8 +55,11 @@ class PlayGame extends Phaser.Scene {
         super("PlayGame");
     }
     create() {
-
+        // codigo de implementação de logo no background do mapa
         var logo = this.add.image(500, 400, "logo");
+
+        //codigo teste para implementação da moeda no jogo
+        var coin = this.add.image(100, 100, "coin");
 
         // cria um objeto de teclas de seta
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -73,6 +77,7 @@ class PlayGame extends Phaser.Scene {
     
         // cria o sprite do personagem e as coordenadas 
         this.mario = this.physics.add.sprite(90, 150, "mario");
+
         this.mario.body.velocity.x = 0;
         this.mario.body.velocity.y = 0;
         this.mario.body.gravity.y = gameOptions.playerGravity;
@@ -83,6 +88,27 @@ class PlayGame extends Phaser.Scene {
         this.cameras.main.startFollow(this.mario);
 
         this.physics.add.collider(this.mario, this.layer);
+
+       // this.anims.create({
+       //     key: 'left',
+       //     frames: this.anims.generateFrameNumbers('mario', { start: 1, ent: 1}),
+       //     frameRate: 10,
+       //     repeat: -1
+       // });
+
+       // this.anims.create({
+       //     key: 'turn',
+       //     frames: [{key: 'mario', frame: 0 }],
+       //     frameRate: 20,
+       // });
+
+       // this.anims.create({
+       //     key: 'right',
+       //     frames: this.anims.generateFrameNumbers('mario', { start: 1, ent: 1}),
+       //     frameRate: 10,
+       //     repeat: -1
+       // });
+
     }
 
     update(){
@@ -113,6 +139,6 @@ class PlayGame extends Phaser.Scene {
             }
             
         }
-        
+
     }
 }
