@@ -33,8 +33,8 @@ class PreloadGame extends Phaser.Scene {
 
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
-        this.load.image("coin", "assets/coin.png");
-        this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 37, frameHeight: 19 });
+        this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
+        this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 29.6, frameHeight: 16 });
         this.load.image("enemy", "assets/enemy.png");
         this.load.image("logo", "assets/superMarioLogo.png")
     }
@@ -49,9 +49,6 @@ var coin;
 let scoreText = ""; 
 var score = 0;
 var result;
-
-var jumpButton;
-var runButton;
 
 let addCollider = true;
 
@@ -81,13 +78,9 @@ class PlayGame extends Phaser.Scene {
         this.layer = this.map.createStaticLayer("layer01", tile);
         
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
-        this.coin = this.physics.add.sprite(100, 100, "coin");
-        this.mario = this.physics.add.sprite(90, 150, "mario");
-        
-        // codigo de implementação para o mario colidir ao tocar no "bloco"
-        this.physics.add.collider(this.mario, this.layer);
-        this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
+        this.coin = this.physics.add.sprite(200, 100, "coin");
 
+        this.mario = this.physics.add.sprite(90, 150, "mario");
 
         this.mario.body.velocity.x = 0;
         this.mario.body.velocity.y = 0;
@@ -100,6 +93,11 @@ class PlayGame extends Phaser.Scene {
 
         this.scoreText = this.add.text(25, 25, `score: ${score}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
 
+        // codigo de implementação para o mario colidir ao tocar no "bloco"
+        this.physics.add.collider(this.mario, this.layer);
+        this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
+
+        // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('mario', { start: 1, end: 4 }),
@@ -115,7 +113,7 @@ class PlayGame extends Phaser.Scene {
         
         this.anims.create({
             key: 'right',
-            frames: this.anims.generateFrameNumbers('mario', { start: 7, end: 10 }),
+            frames: this.anims.generateFrameNumbers('mario', { start: 9, end: 10 }),
             frameRate: 10,
             repeat: -1
         });
@@ -127,11 +125,7 @@ class PlayGame extends Phaser.Scene {
             repeat: -1
         });
         
-        if (this.coin && this.coin.children) {
-            this.coin.children.iterate(function (child) {
-                child.anims.play('spin', true);
-            });
-        }
+        this.coin.anims.play('spin', true);
 
     }
 
@@ -153,25 +147,12 @@ class PlayGame extends Phaser.Scene {
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
-        if((this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown)){
-                if(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown){
-                    this.mario.body.velocity.x = -gameOptions.playerSpeed * 2;
-                }
-                else{
-                    this.mario.body.velocity.x = gameOptions.playerSpeed * 2;
-                }     
-        }
     }
 }
 
-// função para a moeda desaparecer quando o mario colidir com ela
+// função para a moeda desaparecer quando o mario colidir com ela e o score aumentar
 function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('score: ' + score);
-}
-
-// função para o score aumentar quando cada moeda é apanhada
-function raiseScore(mario, coin, score){
-
 }
