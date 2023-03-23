@@ -34,7 +34,7 @@ class PreloadGame extends Phaser.Scene {
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
-        this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 29.6, frameHeight: 16 });
+        this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
         this.load.image("enemy", "assets/enemy.png");
         this.load.image("logo", "assets/superMarioLogo.png")
     }
@@ -100,21 +100,21 @@ class PlayGame extends Phaser.Scene {
         // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
             key: 'left',
-            frames: this.anims.generateFrameNumbers('mario', { start: 1, end: 4 }),
-            frameRate: 10,
+            frames: this.anims.generateFrameNumbers('mario', { start: 1, end: 2 }),
+            frameRate: 5,
             repeat: -1
         });
         
         this.anims.create({
             key: 'turn',
-            frames: [ { key: 'mario', frame: 6 } ],
+            frames: [ { key: 'mario', frame: 7 } ],
             frameRate: 20
         });
         
         this.anims.create({
             key: 'right',
-            frames: this.anims.generateFrameNumbers('mario', { start: 9, end: 10 }),
-            frameRate: 10,
+            frames: this.anims.generateFrameNumbers('mario', { start: 11, end: 12 }),
+            frameRate: 5,
             repeat: -1
         });
 
