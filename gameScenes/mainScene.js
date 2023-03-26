@@ -3,7 +3,8 @@ let game;
 const gameOptions = {
     playerGravity: 1100,
     playerSpeed: 150,
-    playerJump: 350
+    playerJump: 350,
+    playerShift: 300
 };
 
 window.onload = function() {
@@ -30,13 +31,14 @@ class PreloadGame extends Phaser.Scene {
         super("PreloadGame");
     }
     preload() {
+        this.load.image("logo", "assets/superMarioLogo.png")
 
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
+
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
-        this.load.image("enemy", "assets/enemy.png");
-        this.load.image("logo", "assets/superMarioLogo.png")
+        //this.load.image("enemy", "assets/enemy.png");
     }
 
     create() {
@@ -44,7 +46,7 @@ class PreloadGame extends Phaser.Scene {
     }
 }
 
-// variaveis
+// variaveisc
 var coin;
 let scoreText = ""; 
 var score = 0;
@@ -54,10 +56,35 @@ let addCollider = true;
 
 class PlayGame extends Phaser.Scene {
     constructor() {
-        super("PlayGame");
+        super("PlayGame");   
     }
-    create() {
-        
+    create() {        
+
+        // codigo de implementação das moedas pelo mapa segundo as coordenadas colocadas abaixo
+        var coinPositions = [
+            { x: 300, y: 100},
+            { x: 397, y: 80 },
+            { x: 290, y: 260},
+            { x: 390, y: 260},
+            { x: 135, y: 260},
+            { x: 415, y: 310},
+            { x: 287, y: 310},
+            { x: 278, y: 405},
+            { x: 278, y: 405},
+            { x: 35, y: 550},
+            { x: 50, y: 680},
+            { x: 414, y: 680},
+            { x: 680, y: 680},
+            { x: 280, y: 610},
+            { x: 280, y: 610},
+            { x: 607, y: 125},
+            { x: 767, y: 115},
+            { x: 846, y: 100},
+            { x: 550, y: 270},
+            { x: 600, y: 470},
+            { x: 850, y: 400},
+          ];
+
         // codigo de implementação de logo no background do mapa
         var logo = this.add.image(500, 400, "logo");
 
@@ -124,7 +151,17 @@ class PlayGame extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
+
+        // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
+        coinPositions.forEach(function(position) {
+            var coin = this.physics.add.sprite(position.x, position.y, 'coin');
+            coin.setBounce(1);
+            coin.setCollideWorldBounds(false);
+            coin.anims.play('spin', true);  
+            this.physics.add.collider(this.mario, coin, getcoin, null, this);  
+          }, this);
         
+        // esta função que chama a animação "spin" é para a primeira moeda do jogo que está colocada fora da function coinPositions -- retirar
         this.coin.anims.play('spin', true);
 
     }
