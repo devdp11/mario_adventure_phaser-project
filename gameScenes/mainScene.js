@@ -19,7 +19,7 @@ window.onload = function() {
                 gravity: {
                     y: 0
                 }
-            }
+            }   
         },
         scene: [PreloadGame, PlayGame],
     };
@@ -35,6 +35,7 @@ class PreloadGame extends Phaser.Scene {
 
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
+        this.load.image("flag", "assets/flag.png");
 
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
@@ -50,7 +51,8 @@ class PreloadGame extends Phaser.Scene {
 var coin;
 let scoreText = ""; 
 var score = 0;
-var result;
+var flag;
+var layer1;
 
 let addCollider = true;
 
@@ -85,6 +87,7 @@ class PlayGame extends Phaser.Scene {
             { x: 850, y: 400},
           ];
 
+        this.flag = this.physics.add.sprite(770, 650, "flag");
         // codigo de implementação de logo no background do mapa
         var logo = this.add.image(500, 400, "logo");
 
@@ -96,13 +99,13 @@ class PlayGame extends Phaser.Scene {
         const tile = this.map.addTilesetImage("tileset01", "tile");
         
         // blocos cujo player colide ao pousar
-        this.map.setCollisionBetween(16, 17);
-        this.map.setCollisionBetween(27, 28);
+        this.map.setCollisionBetween(15, 17);
         this.map.setCollisionBetween(21, 22);
+        this.map.setCollisionBetween(27, 28);
         this.map.setCollision(40);
 
-        // criação de uma variavel layer que quando é chamada vai para o "layer01" do tilemap "level.json"
-        this.layer = this.map.createStaticLayer("layer01", tile);
+        // criação de uma variavel layer que quando é chamada vai para o "layer01" e "layer02" do tilemap "level.json"
+        this.layer1 = this.map.createStaticLayer("layer01", tile);
         
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
         this.coin = this.physics.add.sprite(200, 100, "coin");
@@ -121,8 +124,9 @@ class PlayGame extends Phaser.Scene {
         this.scoreText = this.add.text(25, 25, `score: ${score}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
 
         // codigo de implementação para o mario colidir ao tocar no "bloco"
-        this.physics.add.collider(this.mario, this.layer);
+        this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
+        this.physics.add.collider(this.mario, this.flag, gameWin, null, this);
 
         // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
@@ -192,4 +196,8 @@ function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('score: ' + score);
+}
+
+function gameWin(mario, flag){
+
 }
