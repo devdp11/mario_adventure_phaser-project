@@ -198,6 +198,9 @@ function getcoin(mario, coin){
     this.scoreText.setText('score: ' + score);
 }
 
+// função para quando o mario tocar na bandeira, uma imagem aparecer no ecrã
+
 function nxtLvl(mario, flag){
     this.flag = this.physics.add.image(710, 400, "finish");
+    //mario.disableBody(true, true);
 }
