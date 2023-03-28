@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 4000,
-        height: 4000,
+        width: 324,
+        height: 260,
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -53,7 +53,6 @@ let scoreText = "";
 var score = 0;
 var flag;
 var layer1;
-//var timerCount = 0;
 let addCollider = true;
 
 class PlayGame extends Phaser.Scene {
@@ -61,9 +60,9 @@ class PlayGame extends Phaser.Scene {
         super("PlayGame");   
     }
     create() {        
-
         // codigo de implementação das moedas pelo mapa segundo as coordenadas colocadas abaixo
         var coinPositions = [
+            // coordenadas primeiro nivel
             { x: 300, y: 100},
             { x: 397, y: 80 },
             { x: 290, y: 260},
@@ -85,6 +84,8 @@ class PlayGame extends Phaser.Scene {
             { x: 550, y: 270},
             { x: 600, y: 470},
             { x: 850, y: 400},
+            // coordenadas segundo nivel
+            { x: 2380, y: 690 },
           ];
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
@@ -98,7 +99,7 @@ class PlayGame extends Phaser.Scene {
         const tile = this.map.addTilesetImage("tileset01", "tile");
         
         // blocos cujo player colide ao pousar
-        this.map.setCollisionBetween(15, 17);
+        this.map.setCollisionBetween(16, 17);
         this.map.setCollisionBetween(21, 22);
         this.map.setCollisionBetween(27, 28);
         this.map.setCollision(40);
@@ -107,8 +108,7 @@ class PlayGame extends Phaser.Scene {
         this.layer1 = this.map.createStaticLayer("layer01", tile);
         
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
-        this.coin = this.physics.add.sprite(200, 100, "coin");
-
+        this.coin = this.physics.add.sprite("coin");
         this.mario = this.physics.add.sprite(90, 150, "mario");
 
         this.mario.body.velocity.x = 0;
@@ -117,13 +117,13 @@ class PlayGame extends Phaser.Scene {
         this.mario.setCollideWorldBounds(false);
         
         // codigo para definir a câmera/limites e para seguir o mario
-        this.cameras.main.setBounds(0, 0, 2000, 720);
+        this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
         
         this.startTime = 0;
         this.timeElapsed = 0;
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-        this.scoreText = this.add.text(25, 20, `score: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.scoreText = this.add.text(25, 20, `core: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
     
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
@@ -168,8 +168,6 @@ class PlayGame extends Phaser.Scene {
           }, this);
         
         // esta função que chama a animação "spin" é para a primeira moeda do jogo que está colocada fora da function coinPositions -- retirar
-        this.coin.anims.play('spin', true);
-
     }
 
     update(){
@@ -198,14 +196,14 @@ class PlayGame extends Phaser.Scene {
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
-        /*if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey('M'))){
-            this.mario.x = 90;
-            this.mario.y = 25;
-        }*/
-        this.input.keyboard.on('keydown_M', function(event) {
-            this.mario.x = 1800; // define a nova posição x do Mario
-            this.mario.y = 300; // define a nova posição y do Mario
-        }, this);
+
+// cheat code "tp next lvl"
+this.input.keyboard.on('keydown_M', function(event) {
+this.mario.x = 2380;
+this.mario.y = 690;
+this.cameras.main.startFollow(this.mario);
+}, this);
+
     }
 }
 // função para a moeda desaparecer quando o mario colidir com ela e o score aumentar
@@ -215,9 +213,11 @@ function getcoin(mario, coin){
     this.scoreText.setText('score: ' + score);
 }
 
-// função para quando o mario tocar na bandeira, uma imagem aparecer no ecrã
-
+// função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
 function nxtLvl(mario, flag){
-    this.flag = this.physics.add.image(710, 400, "finish");
-    this.timerText = this.add.text(800, 500, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '50px', fill: '#000' });
+    this.mario.x = 2380;
+    this.mario.y = 690;
+    this.cameras.main.startFollow(this.mario);
+    //this.flag = this.physics.add.image(710, 400, "finish");
+    //this.timerText = this.add.text(800, 500, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '50px', fill: '#000' });
 }
