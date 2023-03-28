@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 512,
-        height: 512,
+        width: 4000,
+        height: 4000,
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -43,8 +43,7 @@ class PreloadGame extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start("PlayGame1");
-        this.scene.start("Playgame2");
+        this.scene.start("PlayGame");
     }
 }
 
@@ -54,12 +53,12 @@ let scoreText = "";
 var score = 0;
 var flag;
 var layer1;
-
+//var timerCount = 0;
 let addCollider = true;
 
 class PlayGame extends Phaser.Scene {
     constructor() {
-        super("PlayGame1");   
+        super("PlayGame");   
     }
     create() {        
 
@@ -118,10 +117,13 @@ class PlayGame extends Phaser.Scene {
         this.mario.setCollideWorldBounds(false);
         
         // codigo para definir a câmera/limites e para seguir o mario
-        this.cameras.main.setBounds(0, 0, 960, 720);
+        this.cameras.main.setBounds(0, 0, 2000, 720);
         this.cameras.main.startFollow(this.mario);
-
-        this.scoreText = this.add.text(25, 35, `score: ${score}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        
+        this.startTime = 0;
+        this.timeElapsed = 0;
+        this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.scoreText = this.add.text(25, 20, `score: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
     
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
@@ -171,6 +173,14 @@ class PlayGame extends Phaser.Scene {
     }
 
     update(){
+        if (this.physics.overlap(this.mario, this.flag)) {
+            this.physics.pause(); 
+            nxtLvl.call(this);
+        }else{
+            this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
+            this.timerText.setText(`Time: ${this.timeElapsed}`);
+        }
+
         
         // codigo para movimentar o mario | falta as animações
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
@@ -188,9 +198,16 @@ class PlayGame extends Phaser.Scene {
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
+        /*if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey('M'))){
+            this.mario.x = 90;
+            this.mario.y = 25;
+        }*/
+        this.input.keyboard.on('keydown_M', function(event) {
+            this.mario.x = 1800; // define a nova posição x do Mario
+            this.mario.y = 300; // define a nova posição y do Mario
+        }, this);
     }
 }
-
 // função para a moeda desaparecer quando o mario colidir com ela e o score aumentar
 function getcoin(mario, coin){
     coin.disableBody(true, true);
@@ -200,4 +217,5 @@ function getcoin(mario, coin){
 
 function nxtLvl(mario, flag){
     this.flag = this.physics.add.image(710, 400, "finish");
+    this.timerText = this.add.text(800, 500, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '50px', fill: '#000' });
 }
