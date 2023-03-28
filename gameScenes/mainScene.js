@@ -126,7 +126,7 @@ class PlayGame extends Phaser.Scene {
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
-        this.physics.add.collider(this.mario, this.flag, gameWin, null, this);
+        this.physics.add.collider(this.mario, this.flag);
 
         // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
@@ -196,8 +196,4 @@ function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('score: ' + score);
-}
-
-function gameWin(mario, flag){
-
 }
