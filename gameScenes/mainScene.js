@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 256,
-        height: 256,
+        width: 512,
+        height: 512,
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -32,22 +32,22 @@ class PreloadGame extends Phaser.Scene {
     }
     preload() {
         this.load.image("logo", "assets/superMarioLogo.png")
-
         this.load.tilemapTiledJSON("level", "assets/level.json");
         this.load.image("tile", "assets/tile.png");
         this.load.image("flag", "assets/flag.png");
-
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
+        this.load.image('finish','assets/finish.png');
         //this.load.image("enemy", "assets/enemy.png");
     }
 
     create() {
-        this.scene.start("PlayGame");
+        this.scene.start("PlayGame1");
+        this.scene.start("Playgame2");
     }
 }
 
-// variaveisc
+//variaveis
 var coin;
 let scoreText = ""; 
 var score = 0;
@@ -58,7 +58,7 @@ let addCollider = true;
 
 class PlayGame extends Phaser.Scene {
     constructor() {
-        super("PlayGame");   
+        super("PlayGame1");   
     }
     create() {        
 
@@ -121,12 +121,22 @@ class PlayGame extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 960, 720);
         this.cameras.main.startFollow(this.mario);
 
-        this.scoreText = this.add.text(25, 25, `score: ${score}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        this.scoreText = this.add.text(25, 35, `score: ${score}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+        //this.timerText = this.add.text(25, 20, `Timer: ${timerCount}`, { fontSize: '16px', fill: '#000' }).setScrollFactor(0);
+
+        //this.timer = this.time.addEvent({
+          //  delay: 1000, // Delay in milliseconds
+            //callback: this.updateTimer, // Callback function to call each time the timer updates
+            //callbackScope: this, // Scope to use for the callback function (in this case, the current scene)
+            //loop: true // Whether the timer should loop or not
+          //});
+
+        //  this.timerCount = 0;
 
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
-        this.physics.add.collider(this.mario, this.flag);
+        this.physics.add.collider(this.mario, this.flag, getflag, null, this);
 
         // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
@@ -172,6 +182,8 @@ class PlayGame extends Phaser.Scene {
 
     update(){
         
+        //this.timerCount += this.game.loop.delta;
+
         // codigo para movimentar o mario | falta as animações
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
@@ -196,4 +208,8 @@ function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('score: ' + score);
+}
+
+function getflag(mario,flag){
+    this.flag = this.physics.add.sprite(710, 400, "finish");
 }
