@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 2000, //324
-        height: 2000, //260
+        width: 512, //324
+        height: 256, //260
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -144,7 +144,7 @@ class PlayGame extends Phaser.Scene {
         this.startTime = 0;
         this.timeElapsed = 0;
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-        this.scoreText = this.add.text(25, 20, `core: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.scoreText = this.add.text(25, 20, `Score: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
     
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
@@ -219,11 +219,16 @@ class PlayGame extends Phaser.Scene {
         }
 
 // cheat code "tp next lvl"
-this.input.keyboard.on('keydown_M', function(event) {
-this.mario.x = 2380;
-this.mario.y = 690;
-this.cameras.main.startFollow(this.mario);
-}, this);
+        this.input.keyboard.on('keydown_M', function(event) {
+            this.mario.x = 2380;
+            this.mario.y = 690;
+            this.cameras.main.startFollow(this.mario);
+        }, this);
+        
+        this.input.keyboard.on('keydown_C', function(event){
+            this.mario.score = 100;
+        }, this);
+
 
     }
 }
@@ -231,7 +236,7 @@ this.cameras.main.startFollow(this.mario);
 function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
-    this.scoreText.setText('score: ' + score);
+    this.scoreText.setText('Score: ' + score);
 }
 
 // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
@@ -239,6 +244,7 @@ function nxtLvl(mario, flag){
     this.mario.x = 2380;
     this.mario.y = 690;
     this.cameras.main.startFollow(this.mario);
+    this.flag.destroy();
     //this.flag = this.physics.add.image(710, 400, "finish");
     //this.timerText = this.add.text(800, 500, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '50px', fill: '#000' });
 }
