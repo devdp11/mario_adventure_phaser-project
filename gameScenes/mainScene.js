@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 324,
-        height: 260,
+        width: 2000, //324
+        height: 2000, //260
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -60,32 +60,53 @@ class PlayGame extends Phaser.Scene {
         super("PlayGame");   
     }
     create() {        
-        // codigo de implementação das moedas pelo mapa segundo as coordenadas colocadas abaixo
+        // codigo de implementação da localização das moedas pelos niveis
         var coinPositions = [
             // coordenadas primeiro nivel
-            { x: 300, y: 100},
-            { x: 397, y: 80 },
-            { x: 290, y: 260},
-            { x: 390, y: 260},
-            { x: 135, y: 260},
-            { x: 415, y: 310},
-            { x: 287, y: 310},
-            { x: 278, y: 405},
-            { x: 278, y: 405},
-            { x: 35, y: 550},
-            { x: 50, y: 680},
-            { x: 414, y: 680},
-            { x: 680, y: 680},
-            { x: 280, y: 610},
-            { x: 280, y: 610},
-            { x: 607, y: 125},
-            { x: 767, y: 115},
-            { x: 846, y: 100},
-            { x: 550, y: 270},
-            { x: 600, y: 470},
-            { x: 850, y: 400},
+            { x: 300, y: 100 },
+            { x: 397, y: 80  },
+            { x: 290, y: 260 },
+            { x: 390, y: 260 },
+            { x: 135, y: 260 },
+            { x: 415, y: 310 },
+            { x: 287, y: 310 },
+            { x: 278, y: 405 },
+            { x: 278, y: 405 },
+            { x: 35, y: 550 },
+            { x: 50, y: 680 },
+            { x: 414, y: 680 },
+            { x: 680, y: 680 },
+            { x: 280, y: 610 },
+            { x: 280, y: 610 },
+            { x: 607, y: 125 },
+            { x: 767, y: 115 },
+            { x: 846, y: 100 },
+            { x: 550, y: 270 },
+            { x: 600, y: 470 },
+            { x: 850, y: 400 },
             // coordenadas segundo nivel
-            { x: 2380, y: 690 },
+            { x: 2300, y: 690 },
+            { x: 2118, y: 600 },
+            { x: 1870, y: 630 },
+            { x: 1650, y: 690 },
+            { x: 1700, y: 550 },
+            { x: 1900, y: 545 },
+            { x: 1900, y: 350 },
+            { x: 1675, y: 330 },
+            { x: 1675, y: 290 },
+            { x: 1675, y: 250 },
+            { x: 1910, y: 185 },
+            { x: 2000, y: 185 },
+            { x: 2075, y: 460 },
+            { x: 2133, y: 220 },
+            { x: 2170, y: 445 },
+            { x: 2272, y: 440 },
+            { x: 2223, y: 290 },
+            { x: 2510, y: 430 },
+            { x: 2525, y: 145 },
+            { x: 2325, y: 60  },
+            { x: 2134, y: 95  },
+            { x: 1934, y: 65  },
           ];
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
