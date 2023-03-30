@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 512, //324
-        height: 256, //260
+        width: 324, //324
+        height: 324, //260
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -36,6 +36,7 @@ class PreloadGame extends Phaser.Scene {
 
         this.load.image("tile", "assets/tile.png");
         this.load.image("flag", "assets/flag.png");
+        this.load.image("flag2", "assets/flag2.png");
         this.load.image('finish','assets/finish.png');
 
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
@@ -52,6 +53,7 @@ var coin;
 let scoreText = ""; 
 var score = 0;
 var flag;
+var flag2;
 var layer1;
 let addCollider = true;
 
@@ -72,8 +74,8 @@ class PlayGame extends Phaser.Scene {
             { x: 287, y: 310 },
             { x: 278, y: 405 },
             { x: 278, y: 405 },
-            { x: 35, y: 550 },
-            { x: 50, y: 680 },
+            { x: 35, y: 550  },
+            { x: 50, y: 680  },
             { x: 414, y: 680 },
             { x: 680, y: 680 },
             { x: 280, y: 610 },
@@ -110,7 +112,7 @@ class PlayGame extends Phaser.Scene {
           ];
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
-        // codigo de implementação de logo no background do mapa
+        this.flag2 = this.physics.add.sprite(1735, 90, "flag2");
 
         // cria um objeto de teclas de seta
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -187,10 +189,9 @@ class PlayGame extends Phaser.Scene {
             coin.anims.play('spin', true);  
             this.physics.add.collider(this.mario, coin, getcoin, null, this);  
           }, this);
-        
-        // esta função que chama a animação "spin" é para a primeira moeda do jogo que está colocada fora da function coinPositions -- retirar
     }
 
+    // codigo de implementação para quando o mario tocar na bandeira do primeiro mapa ser teleporatdo para o segundo map atraves da funçao "nxtLvl" 
     update(){
         if (this.physics.overlap(this.mario, this.flag)) {
             this.physics.pause(); 
@@ -201,7 +202,7 @@ class PlayGame extends Phaser.Scene {
         }
 
         
-        // codigo para movimentar o mario | falta as animações
+        // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
             this.mario.anims.play('left', true);
