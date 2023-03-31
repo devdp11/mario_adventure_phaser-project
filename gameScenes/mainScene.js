@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function() {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 324, //324
-        height: 324, //260
+        width: 512, //324
+        height: 512, //260
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -32,8 +32,6 @@ class PreloadGame extends Phaser.Scene {
     }
     preload() {
         this.load.tilemapTiledJSON("level", "assets/level.json");
-        this.load.tilemapTiledJSON("level2", "assets/level2.json");
-
         this.load.image("tile", "assets/tile.png");
         this.load.image("flag", "assets/flag.png");
         this.load.image("flag2", "assets/flag2.png");
@@ -41,6 +39,12 @@ class PreloadGame extends Phaser.Scene {
 
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
+
+        this.load.audio('coinSound', 'assets/sound_coin.wav');
+        this.load.audio('jumpSound', 'assets/sound_jump.wav');
+        this.load.audio('lvlupSound', 'assets/sound_lvl_up.wav');
+
+        this.load.audio('sceneSound', 'assets/sound_scene.mp3');
     }
 
     create() {
@@ -111,6 +115,13 @@ class PlayGame extends Phaser.Scene {
             { x: 1934, y: 65  },
           ];
 
+        //implementaçao do som do jogo
+        this.soundFx = this.sound.add('coinSound');
+        this.soundFx = this.sound.add('jumpSound');
+        this.soundFx = this.sound.add('lvlupSound');
+        this.sound.add('sceneSound', { loop: true});
+        this.sound.play('sceneSound', {volume: 0.009});
+
         this.flag = this.physics.add.sprite(770, 650, "flag");
         this.flag2 = this.physics.add.sprite(1735, 90, "flag2");
 
@@ -180,7 +191,6 @@ class PlayGame extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
-
         // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
         coinPositions.forEach(function(position) {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
@@ -193,6 +203,7 @@ class PlayGame extends Phaser.Scene {
 
     // codigo de implementação para quando o mario tocar na bandeira do primeiro mapa ser teleporatdo para o segundo map atraves da funçao "nxtLvl" 
     update(){
+        
         if (this.physics.overlap(this.mario, this.flag)) {
             this.physics.pause(); 
             nxtLvl.call(this);
@@ -216,6 +227,7 @@ class PlayGame extends Phaser.Scene {
             this.mario.anims.play('turn');
         }
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
+            this.sound.play('jumpSound', {volume: 0.1});
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
 
@@ -238,6 +250,7 @@ function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('Score: ' + score);
+    this.sound.play('coinSound', {volume: 0.1});
 }
 
 // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
