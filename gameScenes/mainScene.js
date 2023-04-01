@@ -36,14 +36,16 @@ class PreloadGame extends Phaser.Scene {
         this.load.image("flag", "assets/flag.png");
         this.load.image("flag2", "assets/flag2.png");
         this.load.image('finish','assets/finish.png');
+        
+        this.load.image('over','assets/lose.png');
 
         this.load.spritesheet('coin', 'assets/coin.png', { frameWidth:18.25 , frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/mario.png',{ frameWidth: 17, frameHeight: 17});
-
+        this.load.image('particle', 'assets/particle.png');
         this.load.audio('coinSound', 'assets/sound_coin.wav');
         this.load.audio('jumpSound', 'assets/sound_jump.wav');
         this.load.audio('lvlupSound', 'assets/sound_lvl_up.wav');
-
+        this.load.audio('losseliveSound', 'assets/sound_losse_live.wav');
         this.load.audio('sceneSound', 'assets/sound_scene.mp3');
     }
 
@@ -55,11 +57,16 @@ class PreloadGame extends Phaser.Scene {
 //variaveis
 var coin;
 let scoreText = ""; 
+let scoreTextlive = "";
 var score = 0;
+var lives = 3;
 var flag;
 var flag2;
 var layer1;
+var plataform1;
+var plataform2;
 let addCollider = true;
+var particles;
 
 class PlayGame extends Phaser.Scene {
     constructor() {
@@ -114,13 +121,20 @@ class PlayGame extends Phaser.Scene {
             { x: 2134, y: 95  },
             { x: 1934, y: 65  },
           ];
-
+        
+        //lose e pariculas
+        this.platform1 = this.physics.add.staticGroup();
+        this.platform1.create(400, 875, 'over').setScale(2).refreshBody();
+        this.platform2 = this.physics.add.staticGroup();
+        this.platform2.create(2200, 875, 'over').setScale(2).refreshBody();
+        this.add.particles('particle');
         //implementaçao do som do jogo
         this.soundFx = this.sound.add('coinSound');
         this.soundFx = this.sound.add('jumpSound');
         this.soundFx = this.sound.add('lvlupSound');
+        this.soundFx = this.sound.add('losseliveSound');
         this.sound.add('sceneSound', { loop: true});
-        this.sound.play('sceneSound', {volume: 0.009});
+        this.sound.play('sceneSound', {volume: 0.01});
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
         this.flag2 = this.physics.add.sprite(1735, 90, "flag2");
@@ -158,11 +172,14 @@ class PlayGame extends Phaser.Scene {
         this.timeElapsed = 0;
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreText = this.add.text(25, 20, `Score: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.scoreTextlives = this.add.text(25, 60, `lives: ${lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
     
         // codigo de implementação para o mario colidir ao tocar no "bloco"
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.coin, getcoin, null, this);
         this.physics.add.collider(this.mario, this.flag, nxtLvl, null, this);
+        this.physics.add.collider(this.mario, this.platform1, spawn, null, this);
+        this.physics.add.collider(this.mario, this.platform2, nxtLvl, null, this);
 
         // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
@@ -212,7 +229,14 @@ class PlayGame extends Phaser.Scene {
             this.timerText.setText(`Time: ${this.timeElapsed}`);
         }
 
-        
+       /* if(this.mario.body.onFloor()){
+            var emitter = particles.createEmitter({
+                speed: 100,
+                scale: { start: 1, end: 0 },
+                blendMode: 'ADD'
+            });
+        }*/
+
         // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
@@ -253,6 +277,15 @@ function getcoin(mario, coin){
     this.sound.play('coinSound', {volume: 0.1});
 }
 
+//funçao para qunado o mario morrer, voltar para o spawn e perder uma vida
+function spawn (mario){
+    this.mario.x = 90;
+    this.mario.y = 150;
+    this.cameras.main.startFollow(this.mario);
+    this.sound.play('losseliveSound', {volume: 0.1});
+    lives -= 1;
+    this.scoreTextlives.setText('Lives: ' + lives);
+}
 // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
 function nxtLvl(mario, flag){
     this.mario.x = 2380;
