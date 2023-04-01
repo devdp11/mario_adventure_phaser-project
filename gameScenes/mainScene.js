@@ -137,7 +137,7 @@ class PlayGame extends Phaser.Scene {
         this.sound.play('sceneSound', {volume: 0.01});
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
-        this.flag2 = this.physics.add.sprite(1735, 90, "flag2");
+        this.flag2 = this.physics.add.sprite(1728, 90, "flag2");
 
         // cria um objeto de teclas de seta
         this.cursors = this.input.keyboard.createCursorKeys();
