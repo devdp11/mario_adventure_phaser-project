@@ -177,7 +177,7 @@ class PlayGame extends Phaser.Scene {
         this.timeElapsed = 0;
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreText = this.add.text(25, 20, `Score: ${score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-        this.scoreTextlives = this.add.text(25, 60, `lives: ${lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.scoreTextlives = this.add.text(25, 60, `Lives: ${lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
     
         // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
@@ -263,8 +263,12 @@ class PlayGame extends Phaser.Scene {
         
         // cheat code n funcional ainda
         this.input.keyboard.on('keydown_C', function(event){
-            this.scoreText.setText('Score: ' + 999);
-        }, this);
+            if (event.key === ' ') {
+                score += 10;
+            
+                scoreText.setText('Score: ' + score);
+              }
+            }, this);
 
 
     }
