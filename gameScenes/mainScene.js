@@ -250,7 +250,7 @@ class PlayGame extends Phaser.Scene {
             this.mario.anims.play('turn');
         }
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
-            this.sound.play('jumpSound', {volume: 0.1});
+            this.sound.play('jumpSound', {volume: 0.025});
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
 
@@ -263,11 +263,7 @@ class PlayGame extends Phaser.Scene {
         
         // cheat code n funcional ainda
         this.input.keyboard.on('keydown_C', function(event){
-            if (event.key === ' ') {
-                score += 10;
-            
-                scoreText.setText('Score: ' + score);
-              }
+            scoreText.setText('Score: ' + score);
             }, this);
 
 
@@ -279,7 +275,7 @@ function getcoin(mario, coin){
     coin.disableBody(true, true);
     score += 1;
     this.scoreText.setText('Score: ' + score);
-    this.sound.play('coinSound', {volume: 0.1});
+    this.sound.play('coinSound', {volume: 0.025});
 }
 
 //funçao para qunado o mario morrer, voltar para o spawn e perder uma vida
@@ -287,7 +283,7 @@ function outGame1 (mario){
     this.mario.x = 90;
     this.mario.y = 150;
     this.cameras.main.startFollow(this.mario);
-    this.sound.play('loseliveSound', {volume: 0.1});
+    this.sound.play('loseliveSound', {volume: 0.025});
     lives -= 1;
     this.scoreTextlives.setText('Lives: ' + lives);
 }
@@ -296,7 +292,7 @@ function outGame2 (mario){
     this.mario.x = 2380;
     this.mario.y = 690;
     this.cameras.main.startFollow(this.mario);
-    this.sound.play('loseliveSound', {volume: 0.1});
+    this.sound.play('loseliveSound', {volume: 0.025});
     lives -= 1;
     this.scoreTextlives.setText('Lives: ' + lives);
 }
