@@ -302,5 +302,6 @@ function nxtLvl(mario, flag){
     this.mario.x = 2380;
     this.mario.y = 690;
     this.cameras.main.startFollow(this.mario);
+    this.sound.play('lvlupSound', {volume: 0.025});
     this.flag.destroy();
 }
