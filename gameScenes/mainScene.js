@@ -7,7 +7,7 @@ const gameOptions = {
     playerShift: 300
 };
 
-window.onload = function() {
+window.onload = function () {
     const gameConfig = {
         type: Phaser.CANVAS,
         width: 512, //324
@@ -19,9 +19,9 @@ window.onload = function() {
                 gravity: {
                     y: 0
                 }
-            }   
+            }
         },
-        scene: [PreloadGame, PlayGame],
+        scene: [PreloadGame, MenuScene, PlayGame, GameOverScene],
     };
     game = new Phaser.Game(gameConfig);
 };
@@ -36,12 +36,12 @@ class PreloadGame extends Phaser.Scene {
 
         this.load.image("flag", "assets/img/flag.png");
         this.load.image("flag2", "assets/img/flag2.png");
-        this.load.image('over','assets/img/platform.png');
+        this.load.image('over', 'assets/img/platform.png');
         //this.load.image('particle', 'assets/img/particle.png');
 
-        this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth:18.25 , frameHeight: 16 });
-        this.load.spritesheet('mario', 'assets/spritesheet/mario.png',{ frameWidth: 17 , frameHeight: 17});
-        this.load.spritesheet('enemy','assets/spritesheet/enemy.png',{frameWidth: 40.8 , frameHeight:35});
+        this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.25, frameHeight: 16 });
+        this.load.spritesheet('mario', 'assets/spritesheet/mario.png', { frameWidth: 17, frameHeight: 17 });
+        this.load.spritesheet('enemy', 'assets/spritesheet/enemy.png', { frameWidth: 40.8, frameHeight: 35 });
 
         this.load.audio('coinSound', 'assets/audio/sound_coin.wav');
         this.load.audio('jumpSound', 'assets/audio/sound_jump.wav');
@@ -51,18 +51,75 @@ class PreloadGame extends Phaser.Scene {
     }
 
     create() {
-        this.scene.start("PlayGame");
+        this.scene.start("menu");
     }
 }
 
+class MenuScene extends Phaser.Scene {
+    constructor() {
+        super("menu")
+    }
+
+    start_button = null
+
+    preload() { }
+
+    create() {
+
+        this.start_button = this.add.text(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, "Start Game")
+            .setOrigin(0.5)
+            .setPadding(30, 10)
+            .setStyle({
+                backgroundColor: "#fff",
+                fill: "#111",
+                fontSize: 24,
+                fontStyle: "bold"
+            })
+            .setInteractive()
+            .on('pointerup', () => {
+                this.scene.start("game")
+            })
+    }
+}
+
+class GameOverScene extends Phaser.Scene {
+    constructor() {
+        super("gameover")
+    }
+
+    start_button = null
+
+    preload() { }
+
+    create() {
+
+        this.start_button = this.add.text(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, "Restart")
+            .setOrigin(0.5)
+            .setPadding(30, 10)
+            .setStyle({
+                backgroundColor: "#fff",
+                fill: "#111",
+                fontSize: 24,
+                fontStyle: "bold"
+            })
+            .setInteractive()
+            .on('pointerup', () => {
+                const game = this.scene.get("game");
+                game.scene.restart();
+                this.scene.start("game");
+            })
+    }
+}
+
+
 class PlayGame extends Phaser.Scene {
     constructor() {
-        super("PlayGame");   
+        super("game");
     }
-    
+
     coin;
     enemy;
-    scoreText = ""; 
+    scoreText = "";
     scoreTextlive = "";
     score = 0;
     lives = 3;
@@ -72,13 +129,19 @@ class PlayGame extends Phaser.Scene {
     plataform1;
     plataform2;
     addCollider = true;
+    isGameOver = false;
 
-    create() {        
+    create() {
+        this.isGameOver = false;
+
+        this.score = 0;
+        this.lives = 3;
+
         // codigo de implementação da localização das moedas pelos niveis
         var coinPositions = [
             // coordenadas primeiro nivel
             { x: 300, y: 100 },
-            { x: 397, y: 80  },
+            { x: 397, y: 80 },
             { x: 290, y: 260 },
             { x: 390, y: 260 },
             { x: 135, y: 260 },
@@ -86,8 +149,8 @@ class PlayGame extends Phaser.Scene {
             { x: 287, y: 310 },
             { x: 278, y: 405 },
             { x: 278, y: 405 },
-            { x: 35, y: 550  },
-            { x: 50, y: 680  },
+            { x: 35, y: 550 },
+            { x: 50, y: 680 },
             { x: 414, y: 680 },
             { x: 680, y: 680 },
             { x: 280, y: 610 },
@@ -118,15 +181,15 @@ class PlayGame extends Phaser.Scene {
             { x: 2223, y: 290 },
             { x: 2510, y: 430 },
             { x: 2525, y: 145 },
-            { x: 2325, y: 60  },
-            { x: 2134, y: 95  },
-            { x: 1934, y: 65  },
-          ];
+            { x: 2325, y: 60 },
+            { x: 2134, y: 95 },
+            { x: 1934, y: 65 },
+        ];
         //implementaçao do inimigo
 
         var enemyPositions = [
-            {x: 300, y:200},
-            {x:90, y:600},
+            { x: 300, y: 200 },
+            { x: 90, y: 600 },
         ];
 
         //plataformas debaixo do mapa para o mario perder ao colidir com elas
@@ -134,30 +197,30 @@ class PlayGame extends Phaser.Scene {
         this.platform1.create(400, 875, 'over').setScale(2).refreshBody();
         this.platform2 = this.physics.add.staticGroup();
         this.platform2.create(2200, 875, 'over').setScale(2).refreshBody();
-        
+
         // particulas que aparecem quando o mario esta a andar no mapa
         //this.add.particles('particle');
-        
+
         //implementaçao do som do jogo
         this.soundFx = this.sound.add('coinSound');
         this.soundFx = this.sound.add('jumpSound');
         this.soundFx = this.sound.add('lvlupSound');
         this.soundFx = this.sound.add('loseliveSound');
-        
-        //this.sound.add('sceneSound', { loop: true});
-        this.sound.play('sceneSound', {volume: 0.01, loop: true});
 
-        
+        //this.sound.add('sceneSound', { loop: true});
+        this.sound.play('sceneSound', { volume: 0.01, loop: true });
+
+
         this.flag = this.physics.add.sprite(770, 650, "flag");
         this.flag2 = this.physics.add.sprite(1728, 90, "flag2");
 
         // cria um objeto de teclas de seta
         this.cursors = this.input.keyboard.createCursorKeys();
-    
+
         // codigo de implementação do tilemap e tileset no ecrã
         this.map = this.make.tilemap({ key: "level" });
         const tile = this.map.addTilesetImage("tileset01", "tile");
-        
+
         // blocos cujo player colide ao pousar
         this.map.setCollisionBetween(16, 17);
         this.map.setCollisionBetween(21, 22);
@@ -166,7 +229,7 @@ class PlayGame extends Phaser.Scene {
 
         // criação de uma variavel layer que quando é chamada vai para o "layer01" e "layer02" do tilemap "level.json"
         this.layer1 = this.map.createStaticLayer("layer01", tile);
-        
+
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
         this.coin = this.physics.add.sprite("coin");
         this.enemy = this.physics.add.sprite("enemy");
@@ -176,22 +239,24 @@ class PlayGame extends Phaser.Scene {
         this.mario.body.velocity.y = 0;
         this.mario.body.gravity.y = gameOptions.playerGravity;
         this.mario.setCollideWorldBounds(false);
-        
+
         // codigo para definir a câmera/limites e para seguir o mario
         this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
         //this.cameras.main.setZoom(1.5);
-        
+
         this.startTime = 0;
         this.timeElapsed = 0;
-        this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold',fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreText = this.add.text(25, 20, `Score: ${this.score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreTextlives = this.add.text(25, 60, `Lives: ${this.lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-    
+
         // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.coin, this.getcoin, null, this);
         this.physics.add.collider(this.mario, this.flag, this.nxtLvl, null, this);
+        this.physics.add.collider(this.mario, this.flag2, this.finishGame, null, this);
+
         // codigo de implementação para o mario colidir ao cair do mapa
         this.physics.add.collider(this.mario, this.platform1, this.outGame1, null, this);
         this.physics.add.collider(this.mario, this.platform2, this.outGame2, null, this);
@@ -203,13 +268,13 @@ class PlayGame extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
-        
+
         this.anims.create({
             key: 'turn',
-            frames: [ { key: 'mario', frame: 7 } ],
+            frames: [{ key: 'mario', frame: 7 }],
             frameRate: 20
         });
-        
+
         this.anims.create({
             key: 'right',
             frames: this.anims.generateFrameNumbers('mario', { start: 11, end: 12 }),
@@ -231,7 +296,7 @@ class PlayGame extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
-        
+
         this.anims.create({
             key: 'leftenemy',
             frames: this.anims.generateFrameNumbers('enemy', { start: 0, end: 2 }),
@@ -240,113 +305,123 @@ class PlayGame extends Phaser.Scene {
         });
 
         // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
-        coinPositions.forEach(function(position) {
+        coinPositions.forEach(function (position) {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
             coin.setBounce(1);
             coin.setCollideWorldBounds(false);
-            coin.anims.play('spin', true);  
-            this.physics.add.collider(this.mario, coin, this.getcoin, null, this);  
-          }, this);
+            coin.anims.play('spin', true);
+            this.physics.add.collider(this.mario, coin, this.getcoin, null, this);
+        }, this);
 
-          enemyPositions.forEach(function(position) {
+        enemyPositions.forEach(function (position) {
             // posição
             var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
-            
+
             // adicionar a física para o inimigo
             this.physics.add.existing(enemy);
-            this.physics.add.collider(enemy, this.layer1, function(enemy, layer1) {
+            this.physics.add.collider(enemy, this.layer1, function (enemy, layer1) {
                 if (enemy.body.touching.left || enemy.body.touching.right) {
                     enemy.body.velocity.x *= -1;
                     enemy.anims.play(enemy.body.velocity.x > 0 ? 'rightenemy' : 'leftenemy', true);
                 }
-                if(enemy.body.touching.right){
+                if (enemy.body.touching.right) {
                     console.log("a");
                 }
             });
-        
+
             // configurar a animação do inimigo
             enemy.anims.play('rightenemy', true);
             enemy.body.setVelocityX(35);
             enemy.body.gravity.y = gameOptions.playerGravity;
         }, this);
-        
-          // cheat
-          this.input.keyboard.on('keydown_M', function(event) {
+
+        // cheat
+        this.input.keyboard.on('keydown_M', function (event) {
             this.mario.x = 2380;
             this.mario.y = 690;
             this.cameras.main.startFollow(this.mario);
         }, this);
-        
+
+        this.input.keyboard.on('keydown_P', function (event) {
+            this.mario.x = 1828;
+            this.mario.y = 100;
+            this.cameras.main.startFollow(this.mario);
+        }, this);
+
         // cheat code n funcional ainda
-        this.input.keyboard.on('keydown_C', function(event){
+        this.input.keyboard.on('keydown_C', function (event) {
             this.score += 1000;
             this.scoreText.setText('Score: ' + this.score);
             console.log(this.score);
-            }, this);
-        
+        }, this);
+
     }
 
-    update(){
-        
-        // codigo de implementação para quando o mario tocar na bandeira do primeiro mapa ser teleporatdo para o segundo map atraves da funçao "nxtLvl" 
-        if (this.physics.overlap(this.mario, this.flag)) {
-            this.physics.pause(); 
-            nxtLvl.call(this);
-        }else{
+    update() {
+
+        if (this.isGameOver) return;
+
             this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
             this.timerText.setText(`Time: ${this.timeElapsed}`);
-        }
 
+            
         // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
-            this.mario.body.velocity.x = -gameOptions.playerSpeed;
+            console.log(this.mario);
+            this.mario.setVelocityX(-gameOptions.playerSpeed);
             this.mario.anims.play('left', true);
-        } 
+        }
         else if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown) {
             this.mario.body.velocity.x = gameOptions.playerSpeed;
             this.mario.anims.play('right', true);
-        } 
+        }
         else {
             this.mario.body.velocity.x = 0;
             this.mario.anims.play('turn');
         }
-        if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
-            this.sound.play('jumpSound', {volume: 0.025});
+        if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()) {
+            this.sound.play('jumpSound', { volume: 0.025 });
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
     }
-    getcoin(mario, coin){
+    getcoin(mario, coin) {
         coin.destroy();
         this.score += 1;
         this.scoreText.setText('Score: ' + this.score);
-        this.sound.play('coinSound', {volume: 0.025});
+        this.sound.play('coinSound', { volume: 0.025 });
     }
-    
+
     //funçao para qunado o mario morrer, voltar para o spawn e perder uma vida
-    outGame1 (mario){
+    outGame1(mario) {
         this.mario.x = 90;
         this.mario.y = 150;
         this.cameras.main.startFollow(this.mario);
-        this.sound.play('loseliveSound', {volume: 0.025});
+        this.sound.play('loseliveSound', { volume: 0.025 });
         this.lives -= 1;
         this.scoreTextlives.setText('Lives: ' + this.lives);
     }
-    
-    outGame2 (mario){
+
+    outGame2(mario) {
         this.mario.x = 2380;
         this.mario.y = 690;
         this.cameras.main.startFollow(this.mario);
-        this.sound.play('loseliveSound', {volume: 0.025});
+        this.sound.play('loseliveSound', { volume: 0.025 });
         this.lives -= 1;
         this.scoreTextlives.setText('Lives: ' + this.lives);
     }
-    
+
     // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
-    nxtLvl(mario, flag){
+    nxtLvl(mario, flag) {
         this.mario.x = 2380;
         this.mario.y = 690;
         this.cameras.main.startFollow(this.mario);
-        this.sound.play('lvlupSound', {volume: 0.025});
+        this.sound.play('lvlupSound', { volume: 0.025 });
         this.flag.destroy();
+    }
+
+    finishGame(mario, flag2){
+        this.sound.play('lvlupSound', { volume: 0.025 });
+        this.scene.start('gameover');
+        this.isGameOver = true;
     }
 }
