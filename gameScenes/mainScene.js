@@ -40,7 +40,8 @@ class PreloadGame extends Phaser.Scene {
         //this.load.image('particle', 'assets/img/particle.png');
 
         this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth:18.25 , frameHeight: 16 });
-        this.load.spritesheet('mario', 'assets/spritesheet/mario.png',{ frameWidth: 17, frameHeight: 17});
+        this.load.spritesheet('mario', 'assets/spritesheet/mario.png',{ frameWidth: 17 , frameHeight: 17});
+        this.load.spritesheet('enemy','assets/spritesheet/enemy.png',{frameWidth: 40.8 , frameHeight:35});
 
         this.load.audio('coinSound', 'assets/audio/sound_coin.wav');
         this.load.audio('jumpSound', 'assets/audio/sound_jump.wav');
@@ -56,6 +57,7 @@ class PreloadGame extends Phaser.Scene {
 
 //variaveis
 var coin;
+var enemy;
 let scoreText = ""; 
 let scoreTextlive = "";
 var score = 0;
@@ -66,6 +68,7 @@ var layer1;
 var plataform1;
 var plataform2;
 let addCollider = true;
+
 //var particles;
 
 class PlayGame extends Phaser.Scene {
@@ -121,7 +124,13 @@ class PlayGame extends Phaser.Scene {
             { x: 2134, y: 95  },
             { x: 1934, y: 65  },
           ];
-        
+        //implementaçao do inimigo
+
+        var enemyPositions = [
+            {x: 300, y:200},
+            {x:90, y:600},
+        ];
+
         //plataformas debaixo do mapa para o mario perder ao colidir com elas
         this.platform1 = this.physics.add.staticGroup();
         this.platform1.create(400, 875, 'over').setScale(2).refreshBody();
@@ -162,6 +171,7 @@ class PlayGame extends Phaser.Scene {
         
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
         this.coin = this.physics.add.sprite("coin");
+        this.enemy = this.physics.add.sprite("enemy");
         this.mario = this.physics.add.sprite(90, 150, "mario");
 
         this.mario.body.velocity.x = 0;
@@ -215,6 +225,21 @@ class PlayGame extends Phaser.Scene {
             repeat: -1
         });
 
+        //movimento dos inimigos
+        this.anims.create({
+            key: 'rightenemy',
+            frames: this.anims.generateFrameNumbers('enemy', { start: 3, end: 5 }),
+            frameRate: 5,
+            repeat: -1
+        });
+        
+        this.anims.create({
+            key: 'leftenemy',
+            frames: this.anims.generateFrameNumbers('enemy', { start: 0, end: 2 }),
+            frameRate: 5,
+            repeat: -1
+        });
+
         // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
         coinPositions.forEach(function(position) {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
@@ -223,6 +248,30 @@ class PlayGame extends Phaser.Scene {
             coin.anims.play('spin', true);  
             this.physics.add.collider(this.mario, coin, getcoin, null, this);  
           }, this);
+
+          enemyPositions.forEach(function(position) {
+            // posição
+            var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
+            
+            // adicionar a física para o inimigo
+            this.physics.add.existing(enemy);
+            this.physics.add.collider(enemy, this.layer1, function(enemy, layer1) {
+                if (enemy.body.touching.left || enemy.body.touching.right) {
+                    enemy.body.velocity.x *= -1;
+                    enemy.anims.play(enemy.body.velocity.x > 0 ? 'rightenemy' : 'leftenemy', true);
+                }
+                if(enemy.body.touching.right){
+                    console.log("a");
+                }
+            });
+        
+            // configurar a animação do inimigo
+            enemy.anims.play('rightenemy', true);
+            enemy.body.setVelocityX(35);
+            enemy.body.gravity.y = gameOptions.playerGravity;
+        }, this);
+        
+            
     }
 
     update(){
@@ -304,4 +353,11 @@ function nxtLvl(mario, flag){
     this.cameras.main.startFollow(this.mario);
     this.sound.play('lvlupSound', {volume: 0.025});
     this.flag.destroy();
+}
+
+function gameover(mario){
+    this.mario.x = 2380;
+    this.mario.y = 690;
+    this.cameras.main.startFollow(this.mario);
+    this.sound.play('lvlupSound', {volume: 0.025});
 }
