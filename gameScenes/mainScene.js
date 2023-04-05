@@ -254,7 +254,6 @@ class PlayGame extends Phaser.Scene {
         //this.cameras.main.setZoom(1.5);
 
         this.startTime = 0;
-        this.timeElapsed = 0;
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreText = this.add.text(25, 20, `Score: ${this.score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreTextlives = this.add.text(25, 60, `Lives: ${this.lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
@@ -314,8 +313,8 @@ class PlayGame extends Phaser.Scene {
 
         // cheat
         this.input.keyboard.on('keydown_M', function (event) {
-            this.mario.x = 90;
-            this.mario.y = 550;
+            this.mario.x = 650;
+            this.mario.y = 700;
             this.cameras.main.startFollow(this.mario);
         }, this);
 
@@ -349,20 +348,19 @@ class PlayGame extends Phaser.Scene {
             
         // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
-            console.log(this.mario);
-            this.mario.setVelocityX(-gameOptions.playerSpeed);
+            this.mario.body.velocity.x = -gameOptions.playerSpeed;
             this.mario.anims.play('left', true);
-        }
+        } 
         else if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown) {
             this.mario.body.velocity.x = gameOptions.playerSpeed;
             this.mario.anims.play('right', true);
-        }
+        } 
         else {
             this.mario.body.velocity.x = 0;
             this.mario.anims.play('turn');
         }
-        if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()) {
-            this.sound.play('jumpSound', { volume: 0.025 });
+        if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown && this.mario.body.onFloor()){
+            this.sound.play('jumpSound', {volume: 0.025});
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
     }
@@ -394,7 +392,6 @@ class PlayGame extends Phaser.Scene {
     loselive(mario){
         this.lives -= 1;
         this.scoreTextlives.setText('Lives: ' + this.lives);
-        console.log("oi");
     }
 
     // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
@@ -403,9 +400,12 @@ class PlayGame extends Phaser.Scene {
         this.mario.y = 690;
         this.cameras.main.startFollow(this.mario);
         this.sound.play('lvlupSound', { volume: 0.025 });
-        this.flag.destroy();
+        
+        
+        this.flag.body.setVelocityX(0);
+        
         this.score = 0;
-        this.lives = 0;
+        this.startTime = 0;
     }
 
     finishGame(mario, flag2){
