@@ -185,8 +185,8 @@ class PlayGame extends Phaser.Scene {
             { x: 2134, y: 95 },
             { x: 1934, y: 65 },
         ];
+        
         //implementaçao do inimigo
-
         var enemyPositions = [
             { x: 300, y: 200 },
             { x: 90, y: 600 },
@@ -417,6 +417,8 @@ class PlayGame extends Phaser.Scene {
         this.cameras.main.startFollow(this.mario);
         this.sound.play('lvlupSound', { volume: 0.025 });
         this.flag.destroy();
+        this.score = 0;
+        this.lives = 0;
     }
 
     finishGame(mario, flag2){
