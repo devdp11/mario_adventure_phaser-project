@@ -38,7 +38,6 @@ class PreloadGame extends Phaser.Scene {
         this.load.image("flag2", "assets/img/flag2.png");
         this.load.image('over', 'assets/img/platform.png');
         this.load.image('collide','assets/img/collide.png');
-        //this.load.image('particle', 'assets/img/particle.png');
 
         this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.25, frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/spritesheet/mario.png', { frameWidth: 17, frameHeight: 17 });
@@ -89,11 +88,11 @@ class GameOverScene extends Phaser.Scene {
     }
 
     start_button = null
+    text = null
 
     preload() { }
 
     create() {
-
         this.start_button = this.add.text(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, "Restart")
             .setOrigin(0.5)
             .setPadding(30, 10)
@@ -189,16 +188,18 @@ class PlayGame extends Phaser.Scene {
             { x: 1934, y: 65 },
         ];
 
-        //implementaçao de coliçoes
-        var collidePositions = [
-            {x: 230, y:250}, //206.8
-            {x: 450, y:260},
-        ];
-
         //implementaçao do inimigo
         var enemyPositions = [
-            { x: 300, y: 200 },
-            { x: 90, y: 600 },
+            { x: 442, y: 255 },
+            { x: 90, y: 688 },
+            { x: 830, y:  255},
+            { x: 820, y:  399},
+            { x: 353, y:  143},
+
+            { x: 2024, y:  351},
+            { x: 2380, y:  495},
+            { x: 1740, y:  687},
+            { x: 1975, y:  111},
         ];
 
         //plataformas debaixo do mapa para o mario perder ao colidir com elas
@@ -262,6 +263,7 @@ class PlayGame extends Phaser.Scene {
 
         // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
+        this.physics.add.collider(this.mario, this.enemy, this.loselive, null, this);
         this.physics.add.collider(this.mario, this.coin, this.getcoin, null, this);
         this.physics.add.collider(this.mario, this.flag, this.nxtLvl, null, this);
         this.physics.add.collider(this.mario, this.flag2, this.finishGame, null, this);
@@ -298,21 +300,6 @@ class PlayGame extends Phaser.Scene {
             repeat: -1
         });
 
-        //movimento dos inimigos
-        this.anims.create({
-            key: 'rightenemy',
-            frames: this.anims.generateFrameNumbers('enemy', { start: 3, end: 5 }),
-            frameRate: 5,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'leftenemy',
-            frames: this.anims.generateFrameNumbers('enemy', { start: 0, end: 2 }),
-            frameRate: 5,
-            repeat: -1
-        });
-
         // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
         coinPositions.forEach(function (position) {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
@@ -321,35 +308,16 @@ class PlayGame extends Phaser.Scene {
             coin.anims.play('spin', true);
             this.physics.add.collider(this.mario, coin, this.getcoin, null, this);
         }, this);
-
-        collidePositions.forEach(function(position) {
-            this.collide = this.physics.add.sprite(position.x, position.y, 'collide'); 
-            this.physics.add.collider(this.enemy,this.collide); 
-            this.collide.setImmovable(true);
-        }, this);
         
         enemyPositions.forEach(function(position) {
             var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
             this.physics.add.collider(enemy, this.layer1);
-            enemy.anims.play('rightenemy', true);
-            enemy.body.setVelocityX(this.enemyVelocity);
-            enemy.direction = 1;
-          
-
-            this.physics.add.collider(enemy, this.collide, function() {
-              enemy.direction *= -1;
-              enemy.flipX = !enemy.flipX;
-              enemy.body.setVelocityX(this.enemyVelocity * enemy.direction);
-            }, null, this);
-
-            enemy.body.gravity.y = gameOptions.playerGravity;
-          }, this);
-    
+          }, this); 
 
         // cheat
         this.input.keyboard.on('keydown_M', function (event) {
-            this.mario.x = 2380;
-            this.mario.y = 690;
+            this.mario.x = 90;
+            this.mario.y = 550;
             this.cameras.main.startFollow(this.mario);
         }, this);
 
@@ -394,6 +362,7 @@ class PlayGame extends Phaser.Scene {
             this.sound.play('jumpSound', { volume: 0.025 });
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
+        console.log(this.mario.x, this.mario.y);
     }
     getcoin(mario, coin) {
         coin.destroy();
@@ -420,6 +389,10 @@ class PlayGame extends Phaser.Scene {
         this.lives -= 1;
         this.scoreTextlives.setText('Lives: ' + this.lives);
     }
+    loselive(mario){
+        this.lives -= 1;
+        this.scoreTextlives.setText('Lives: ' + this.lives);
+    }
 
     // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
     nxtLvl(mario, flag) {
@@ -436,7 +409,6 @@ class PlayGame extends Phaser.Scene {
         this.sound.play('lvlupSound', { volume: 0.025 });
         this.scene.start('gameover');
         this.isGameOver = true;
+        this.soundFx.stop();
     }
-
-   
 }
