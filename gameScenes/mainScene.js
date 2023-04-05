@@ -37,6 +37,7 @@ class PreloadGame extends Phaser.Scene {
         this.load.image("flag", "assets/img/flag.png");
         this.load.image("flag2", "assets/img/flag2.png");
         this.load.image('over', 'assets/img/platform.png');
+        this.load.image('collide','assets/img/collide.png');
         //this.load.image('particle', 'assets/img/particle.png');
 
         this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.25, frameHeight: 16 });
@@ -65,7 +66,7 @@ class MenuScene extends Phaser.Scene {
     preload() { }
 
     create() {
-
+        //pagina inicial
         this.start_button = this.add.text(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, "Start Game")
             .setOrigin(0.5)
             .setPadding(30, 10)
@@ -117,6 +118,8 @@ class PlayGame extends Phaser.Scene {
         super("game");
     }
 
+    enemyVelocity = 36;
+    collide;
     coin;
     enemy;
     scoreText = "";
@@ -185,7 +188,13 @@ class PlayGame extends Phaser.Scene {
             { x: 2134, y: 95 },
             { x: 1934, y: 65 },
         ];
-        
+
+        //implementaçao de coliçoes
+        var collidePositions = [
+            {x: 230, y:250}, //206.8
+            {x: 450, y:260},
+        ];
+
         //implementaçao do inimigo
         var enemyPositions = [
             { x: 300, y: 200 },
@@ -313,27 +322,29 @@ class PlayGame extends Phaser.Scene {
             this.physics.add.collider(this.mario, coin, this.getcoin, null, this);
         }, this);
 
-        enemyPositions.forEach(function (position) {
-            // posição
-            var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
-
-            // adicionar a física para o inimigo
-            this.physics.add.existing(enemy);
-            this.physics.add.collider(enemy, this.layer1, function (enemy, layer1) {
-                if (enemy.body.touching.left || enemy.body.touching.right) {
-                    enemy.body.velocity.x *= -1;
-                    enemy.anims.play(enemy.body.velocity.x > 0 ? 'rightenemy' : 'leftenemy', true);
-                }
-                if (enemy.body.touching.right) {
-                    console.log("a");
-                }
-            });
-
-            // configurar a animação do inimigo
-            enemy.anims.play('rightenemy', true);
-            enemy.body.setVelocityX(35);
-            enemy.body.gravity.y = gameOptions.playerGravity;
+        collidePositions.forEach(function(position) {
+            this.collide = this.physics.add.sprite(position.x, position.y, 'collide'); 
+            this.physics.add.collider(this.enemy,this.collide); 
+            this.collide.setImmovable(true);
         }, this);
+        
+        enemyPositions.forEach(function(position) {
+            var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
+            this.physics.add.collider(enemy, this.layer1);
+            enemy.anims.play('rightenemy', true);
+            enemy.body.setVelocityX(this.enemyVelocity);
+            enemy.direction = 1;
+          
+
+            this.physics.add.collider(enemy, this.collide, function() {
+              enemy.direction *= -1;
+              enemy.flipX = !enemy.flipX;
+              enemy.body.setVelocityX(this.enemyVelocity * enemy.direction);
+            }, null, this);
+
+            enemy.body.gravity.y = gameOptions.playerGravity;
+          }, this);
+    
 
         // cheat
         this.input.keyboard.on('keydown_M', function (event) {
@@ -426,4 +437,6 @@ class PlayGame extends Phaser.Scene {
         this.scene.start('gameover');
         this.isGameOver = true;
     }
+
+   
 }
