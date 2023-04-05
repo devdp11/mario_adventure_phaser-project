@@ -131,12 +131,19 @@ class PlayGame extends Phaser.Scene {
     plataform2;
     addCollider = true;
     isGameOver = false;
+    isInvencible = false;
+    isRestart = false;
 
     create() {
         this.isGameOver = false;
-
+        this.isInvencible = false;
+        
         this.score = 0;
+        this.startTime = 0;
         this.lives = 3;
+        if(this.isRestart){
+            this.startTime = this.time.now;
+        }
 
         // codigo de implementação da localização das moedas pelos niveis
         var coinPositions = [
@@ -239,8 +246,7 @@ class PlayGame extends Phaser.Scene {
         this.layer1 = this.map.createStaticLayer("layer01", tile);
 
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
-        this.enemy = this.physics.add.sprite("enemy");
-        this.coin = this.physics.add.sprite("coin");
+        
         this.mario = this.physics.add.sprite(90, 150, "mario");
 
         this.mario.body.velocity.x = 0;
@@ -252,16 +258,13 @@ class PlayGame extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
         //this.cameras.main.setZoom(1.5);
-
-        this.startTime = 0;
+        
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreText = this.add.text(25, 20, `Score: ${this.score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
         this.scoreTextlives = this.add.text(25, 60, `Lives: ${this.lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
 
         // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
-        this.physics.add.collider(this.mario, this.enemy, this.loselive, null, this);
-        this.physics.add.collider(this.mario, this.coin, this.getcoin, null, this);
         this.physics.add.collider(this.mario, this.flag, this.nxtLvl, null, this);
         this.physics.add.collider(this.mario, this.flag2, this.finishGame, null, this);
 
@@ -298,7 +301,7 @@ class PlayGame extends Phaser.Scene {
         });
 
         // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
-        coinPositions.forEach(function (position) {
+        coinPositions.forEach((position) => {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
             coin.setBounce(1);
             coin.setCollideWorldBounds(false);
@@ -306,9 +309,11 @@ class PlayGame extends Phaser.Scene {
             this.physics.add.collider(this.mario, coin, this.getcoin, null, this);
         }, this);
         
-        enemyPositions.forEach(function(position) {
+        enemyPositions.forEach((position) => {
             var enemy = this.physics.add.sprite(position.x, position.y, 'enemy');
             this.physics.add.collider(enemy, this.layer1);
+            this.physics.add.collider(this.mario, enemy, this.loselive, null, this);
+            enemy.setImmovable(true);
           }, this); 
 
         // cheat
@@ -339,12 +344,6 @@ class PlayGame extends Phaser.Scene {
 
             this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
             this.timerText.setText(`Time: ${this.timeElapsed}`);
-
-        if (this.lives == 0){
-            this.sound.play('loseliveSound', { volume: 0.025 });
-            this.scene.start('gameover');
-            this.isGameOver = true;
-        }
             
         // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
@@ -371,27 +370,33 @@ class PlayGame extends Phaser.Scene {
         this.sound.play('coinSound', { volume: 0.025 });
     }
 
-    //funçao para qunado o mario morrer, voltar para o spawn e perder uma vida
-    outGame1(mario) {
+    //funçao para quando o mario morrer, voltar para o spawn e perder uma vida
+    outGame1() {
         this.mario.x = 90;
         this.mario.y = 150;
         this.cameras.main.startFollow(this.mario);
         this.sound.play('loseliveSound', { volume: 0.025 });
-        this.lives -= 1;
-        this.scoreTextlives.setText('Lives: ' + this.lives);
+        this.loselive();
     }
-
-    outGame2(mario) {
+    outGame2() {
         this.mario.x = 2380;
         this.mario.y = 690;
         this.cameras.main.startFollow(this.mario);
         this.sound.play('loseliveSound', { volume: 0.025 });
-        this.lives -= 1;
-        this.scoreTextlives.setText('Lives: ' + this.lives);
+        this.loselive();
     }
-    loselive(mario){
-        this.lives -= 1;
-        this.scoreTextlives.setText('Lives: ' + this.lives);
+    loselive(){
+        if(!this.isInvencible){
+            this.lives -= 1;
+            this.scoreTextlives.setText('Lives: ' + this.lives);
+            this.isInvencible = true;
+            setTimeout(()=>{
+                this.isInvencible = false;
+            }, 3000);
+            if(this.lives <= 0){
+                this.finishGame();
+            }
+        }
     }
 
     // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
@@ -404,13 +409,17 @@ class PlayGame extends Phaser.Scene {
         
         this.flag.body.setVelocityX(0);
         
-        this.score = 0;
-        this.startTime = 0;
+            this.score = 0;
+            this.scoreText.setText('Score: ' + this.score);
+            this.startTime = this.time.now;
+            this.lives = 3;
+            this.scoreTextlives.setText('Lives: ' + this.lives);
     }
 
     finishGame(mario, flag2){
         this.sound.play('lvlupSound', { volume: 0.025 });
         this.scene.start('gameover');
         this.isGameOver = true;
+        this.isRestart = true;
     }
 }
