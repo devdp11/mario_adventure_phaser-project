@@ -417,7 +417,6 @@ class PlayGame extends Phaser.Scene {
     }
 
     finishGame(mario, flag2){
-        this.sound.play('lvlupSound', { volume: 0.025 });
         this.scene.start('gameover');
         this.isGameOver = true;
         this.isRestart = true;
