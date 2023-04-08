@@ -92,6 +92,7 @@ class GameOverScene extends Phaser.Scene {
 
     preload() { }
 
+    //pagina Restart
     create() {
         this.start_button = this.add.text(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, "Restart")
             .setOrigin(0.5)
@@ -223,8 +224,14 @@ class PlayGame extends Phaser.Scene {
         this.soundFx = this.sound.add('loseliveSound');
 
         //this.sound.add('sceneSound', { loop: true});
-        this.sound.play('sceneSound', { volume: 0.01, loop: true });
+      
 
+        if (typeof this.playedMusic == 'undefined') {
+            this.sound.play('sceneSound', { loop: true , volume: 0.01});
+            this.playedMusic = true;
+        }
+     
+        
 
         this.flag = this.physics.add.sprite(770, 650, "flag");
         this.flag2 = this.physics.add.sprite(1728, 90, "flag2");
@@ -246,9 +253,7 @@ class PlayGame extends Phaser.Scene {
         this.layer1 = this.map.createStaticLayer("layer01", tile);
 
         // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
-        
         this.mario = this.physics.add.sprite(90, 150, "mario");
-
         this.mario.body.velocity.x = 0;
         this.mario.body.velocity.y = 0;
         this.mario.body.gravity.y = gameOptions.playerGravity;
@@ -257,11 +262,24 @@ class PlayGame extends Phaser.Scene {
         // codigo para definir a câmera/limites e para seguir o mario
         this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
-        //this.cameras.main.setZoom(1.5);
         
-        this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-        this.scoreText = this.add.text(25, 20, `Score: ${this.score}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
-        this.scoreTextlives = this.add.text(25, 60, `Lives: ${this.lives}`, { fontFamily: 'Suez One', fontWeight: 'bold', fontWeight: '900', fontSize: '20px', fill: '#000' }).setScrollFactor(0);
+        this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', 
+            fontWeight: 'bold', 
+            fontWeight: '900', 
+            fontSize: '20px', 
+            fill: '#000' }).setScrollFactor(0);
+            
+        this.scoreText = this.add.text(25, 20, `Score: ${this.score}`, { fontFamily: 'Suez One',
+            fontWeight: 'bold',
+            fontWeight: '900',
+            fontSize: '20px',
+            fill: '#000' }).setScrollFactor(0);
+            
+        this.scoreTextlives = this.add.text(25, 60, `Lives: ${this.lives}`, { fontFamily: 'Suez One',
+            fontWeight: 'bold',
+            fontWeight: '900',
+            fontSize: '20px',
+            fill: '#000' }).setScrollFactor(0);
 
         // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
@@ -339,9 +357,9 @@ class PlayGame extends Phaser.Scene {
     }
 
     update() {
-
-        if (this.isGameOver) return;
-
+        if (this.isGameOver){
+          return;
+        }
             this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
             this.timerText.setText(`Time: ${this.timeElapsed}`);
             
@@ -363,7 +381,9 @@ class PlayGame extends Phaser.Scene {
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
     }
+
     getcoin(mario, coin) {
+        
         coin.destroy();
         this.score += 1;
         this.scoreText.setText('Score: ' + this.score);
@@ -395,6 +415,7 @@ class PlayGame extends Phaser.Scene {
             }, 3000);
             if(this.lives <= 0){
                 this.finishGame();
+                
             }
         }
     }
@@ -416,9 +437,10 @@ class PlayGame extends Phaser.Scene {
             this.scoreTextlives.setText('Lives: ' + this.lives);
     }
 
-    finishGame(mario, flag2){
+    finishGame(mario, flag2){ 
         this.scene.start('gameover');
         this.isGameOver = true;
         this.isRestart = true;
+        this.playedMusic = false;
     }
 }
