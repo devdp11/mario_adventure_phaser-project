@@ -39,15 +39,17 @@ class PreloadGame extends Phaser.Scene {
         this.load.image('over', 'assets/img/platform.png');
         this.load.image('collide','assets/img/collide.png');
 
-        this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.25, frameHeight: 16 });
+        this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.29, frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/spritesheet/mario.png', { frameWidth: 17, frameHeight: 17 });
         this.load.spritesheet('enemy', 'assets/spritesheet/enemy.png', { frameWidth: 40.8, frameHeight: 35 });
 
         this.load.audio('coinSound', 'assets/audio/sound_coin.wav');
         this.load.audio('jumpSound', 'assets/audio/sound_jump.wav');
         this.load.audio('lvlupSound', 'assets/audio/sound_lvl_up.wav');
-        this.load.audio('loseliveSound', 'assets/audio/sound_lose_live.wav');
+        this.load.audio('losseGameSound', 'assets/audio/sound_losse_game.wav');
         this.load.audio('sceneSound', 'assets/audio/sound_scene.mp3');
+        this.load.audio('losseLiveSound', 'assets/audio/sound_losse_live.wav');
+        this.load.audio('restart', 'assets/audio/sound_restart.mp3');
     }
 
     create() {
@@ -222,8 +224,8 @@ class PlayGame extends Phaser.Scene {
         this.soundFx = this.sound.add('jumpSound');
         this.soundFx = this.sound.add('lvlupSound');
         this.soundFx = this.sound.add('loseliveSound');
-
-        //this.sound.add('sceneSound', { loop: true});
+        this.soundFx = this.sound.add('restart');
+        this.a = this.sound.add('losseLiveSound');
       
 
         if (typeof this.playedMusic == 'undefined') {
@@ -347,13 +349,13 @@ class PlayGame extends Phaser.Scene {
             this.cameras.main.startFollow(this.mario);
         }, this);
 
-        // cheat code n funcional ainda
         this.input.keyboard.on('keydown_C', function (event) {
+            this.sound.play('coinSound', { volume: 0.025 });
             this.score += 1000;
-            this.scoreText.setText('Score: ' + this.score);
+            //this.scoreText.setText('Score: ' + this.score);
             console.log(this.score);
         }, this);
-
+          
     }
 
     update() {
@@ -362,7 +364,9 @@ class PlayGame extends Phaser.Scene {
         }
             this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
             this.timerText.setText(`Time: ${this.timeElapsed}`);
-            
+        if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown ){
+                this.mario.setVelocityY(300);
+        }  
         // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
@@ -380,12 +384,12 @@ class PlayGame extends Phaser.Scene {
             this.sound.play('jumpSound', {volume: 0.025});
             this.mario.setVelocityY(-gameOptions.playerJump);
         }
+        
     }
 
     getcoin(mario, coin) {
-        
         coin.destroy();
-        this.score += 1;
+        this.score += 100;
         this.scoreText.setText('Score: ' + this.score);
         this.sound.play('coinSound', { volume: 0.025 });
     }
@@ -395,24 +399,32 @@ class PlayGame extends Phaser.Scene {
         this.mario.x = 90;
         this.mario.y = 150;
         this.cameras.main.startFollow(this.mario);
-        this.sound.play('loseliveSound', { volume: 0.025 });
+        this.sound.play('losseLiveSound', { volume: 0.025 });
         this.loselive();
     }
     outGame2() {
         this.mario.x = 2380;
         this.mario.y = 690;
         this.cameras.main.startFollow(this.mario);
-        this.sound.play('loseliveSound', { volume: 0.025 });
+        this.sound.play('losseLiveSound', { volume: 0.025 });
         this.loselive();
     }
+
     loselive(){
+        if (!this.soundPlayed) {
+            this.a.play();
+            this.soundPlayed = true;
+        }
+
         if(!this.isInvencible){
             this.lives -= 1;
             this.scoreTextlives.setText('Lives: ' + this.lives);
             this.isInvencible = true;
+            this.sound.play('losseLiveSound', { volume: 0.025 });
             setTimeout(()=>{
                 this.isInvencible = false;
-            }, 3000);
+            }, 1500);
+
             if(this.lives <= 0){
                 this.finishGame();
                 
