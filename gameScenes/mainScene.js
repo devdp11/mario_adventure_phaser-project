@@ -148,9 +148,7 @@ class PlayGame extends Phaser.Scene {
             this.startTime = this.time.now;
         }
 
-        // codigo de implementação da localização das moedas pelos niveis
         var coinPositions = [
-            // coordenadas primeiro nivel
             { x: 300, y: 100 },
             { x: 397, y: 80 },
             { x: 290, y: 260 },
@@ -172,7 +170,7 @@ class PlayGame extends Phaser.Scene {
             { x: 550, y: 270 },
             { x: 600, y: 470 },
             { x: 850, y: 400 },
-            // coordenadas segundo nivel
+
             { x: 2300, y: 690 },
             { x: 2118, y: 600 },
             { x: 1870, y: 630 },
@@ -197,7 +195,6 @@ class PlayGame extends Phaser.Scene {
             { x: 1934, y: 65 },
         ];
 
-        //implementaçao do inimigo
         var enemyPositions = [
             { x: 442, y: 258 },
             { x: 90, y: 690 },
@@ -210,16 +207,12 @@ class PlayGame extends Phaser.Scene {
             { x: 1740, y:  689},
             { x: 1975, y:  113},
         ];
-        //plataformas debaixo do mapa para o mario perder ao colidir com elas
         this.platform1 = this.physics.add.staticGroup();
         this.platform1.create(400, 875, 'over').setScale(2).refreshBody();
         this.platform2 = this.physics.add.staticGroup();
         this.platform2.create(2200, 875, 'over').setScale(2).refreshBody();
 
-        // particulas que aparecem quando o mario esta a andar no mapa
-        //this.add.particles('particle');
 
-        //implementaçao do som do jogo
         this.soundFx = this.sound.add('coinSound');
         this.soundFx = this.sound.add('jumpSound');
         this.soundFx = this.sound.add('lvlupSound');
@@ -251,17 +244,14 @@ class PlayGame extends Phaser.Scene {
         this.map.setCollisionBetween(27, 28);
         this.map.setCollision(40);
 
-        // criação de uma variavel layer que quando é chamada vai para o "layer01" e "layer02" do tilemap "level.json"
         this.layer1 = this.map.createStaticLayer("layer01", tile);
 
-        // codigo de implementação do mario (player) e da moeda coletável, juntamente com as suas coordenadas iniciais
         this.mario = this.physics.add.sprite(90, 150, "mario");
         this.mario.body.velocity.x = 0;
         this.mario.body.velocity.y = 0;
         this.mario.body.gravity.y = gameOptions.playerGravity;
         this.mario.setCollideWorldBounds(false);
 
-        // codigo para definir a câmera/limites e para seguir o mario
         this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
         
@@ -283,16 +273,13 @@ class PlayGame extends Phaser.Scene {
             fontSize: '20px',
             fill: '#000' }).setScrollFactor(0);
 
-        // codigo de implementação para o mario colidir ao tocar no "bloco" e nos objetos
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.flag, this.nxtLvl, null, this);
         this.physics.add.collider(this.mario, this.flag2, this.finishGame, null, this);
 
-        // codigo de implementação para o mario colidir ao cair do mapa
         this.physics.add.collider(this.mario, this.platform1, this.outGame1, null, this);
         this.physics.add.collider(this.mario, this.platform2, this.outGame2, null, this);
 
-        // codigo de implementação para criar as animações e frames que cada animação deve usar tanto do mario como da coin
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('mario', { start: 1, end: 2 }),
@@ -320,7 +307,6 @@ class PlayGame extends Phaser.Scene {
             repeat: -1
         });
 
-        // codigo de implementação para adicionar moedas pelo mapa, serem coletadas quando o mario colide com elas e para estarem sempre a girar ('spin')
         coinPositions.forEach((position) => {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
             coin.setBounce(1);
@@ -336,7 +322,6 @@ class PlayGame extends Phaser.Scene {
             enemy.setImmovable(true);
           }, this); 
 
-        // cheat
         this.input.keyboard.on('keydown_M', function (event) {
             this.mario.x = 650;
             this.mario.y = 700;
@@ -352,8 +337,7 @@ class PlayGame extends Phaser.Scene {
         this.input.keyboard.on('keydown_C', function (event) {
             this.sound.play('coinSound', { volume: 0.025 });
             this.score += 1000;
-            //this.scoreText.setText('Score: ' + this.score);
-            console.log(this.score);
+            this.scoreText.setText('Score: ' + this.score);
         }, this);
           
     }
@@ -367,7 +351,6 @@ class PlayGame extends Phaser.Scene {
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown ){
                 this.mario.setVelocityY(300);
         }  
-        // codigo para movimentar o mario
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
             this.mario.anims.play('left', true);
@@ -393,8 +376,6 @@ class PlayGame extends Phaser.Scene {
         this.scoreText.setText('Score: ' + this.score);
         this.sound.play('coinSound', { volume: 0.025 });
     }
-
-    //funçao para quando o mario morrer, voltar para o spawn e perder uma vida
     outGame1() {
         this.mario.x = 90;
         this.mario.y = 150;
@@ -409,7 +390,6 @@ class PlayGame extends Phaser.Scene {
         this.sound.play('losseLiveSound', { volume: 0.025 });
         this.loselive();
     }
-
     loselive(){
         if (!this.soundPlayed) {
             this.a.play();
@@ -431,8 +411,6 @@ class PlayGame extends Phaser.Scene {
             }
         }
     }
-
-    // função para quando o mario tocar na bandeira, o mario vai para o segundo nivel
     nxtLvl(mario, flag) {
         this.mario.x = 2380;
         this.mario.y = 690;
@@ -448,7 +426,6 @@ class PlayGame extends Phaser.Scene {
             this.lives = 3;
             this.scoreTextlives.setText('Lives: ' + this.lives);
     }
-
     finishGame(mario, flag2){ 
         this.scene.start('gameover');
         this.isGameOver = true;
