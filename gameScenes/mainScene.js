@@ -10,8 +10,8 @@ const gameOptions = {
 window.onload = function () {
     const gameConfig = {
         type: Phaser.CANVAS,
-        width: 512, //324
-        height: 512, //260
+        width: 512,
+        height: 512,
         backgroundColor: '6bccef',
         physics: {
             default: "arcade",
@@ -25,7 +25,7 @@ window.onload = function () {
     };
     game = new Phaser.Game(gameConfig);
 };
-
+// class preload assets
 class PreloadGame extends Phaser.Scene {
     constructor() {
         super("PreloadGame");
@@ -37,7 +37,6 @@ class PreloadGame extends Phaser.Scene {
         this.load.image("flag", "assets/img/flag.png");
         this.load.image("flag2", "assets/img/flag2.png");
         this.load.image('over', 'assets/img/platform.png');
-        this.load.image('collide','assets/img/collide.png');
 
         this.load.spritesheet('coin', 'assets/spritesheet/coin.png', { frameWidth: 18.29, frameHeight: 16 });
         this.load.spritesheet('mario', 'assets/spritesheet/mario.png', { frameWidth: 17, frameHeight: 17 });
@@ -56,7 +55,7 @@ class PreloadGame extends Phaser.Scene {
         this.scene.start("menu");
     }
 }
-
+// class menu startGame
 class MenuScene extends Phaser.Scene {
     constructor() {
         super("menu")
@@ -83,7 +82,7 @@ class MenuScene extends Phaser.Scene {
             })
     }
 }
-
+// class menu gameOver
 class GameOverScene extends Phaser.Scene {
     constructor() {
         super("gameover")
@@ -114,12 +113,13 @@ class GameOverScene extends Phaser.Scene {
     }
 }
 
-
+// class create Game
 class PlayGame extends Phaser.Scene {
     constructor() {
         super("game");
     }
-
+    
+    // game variables
     collide;
     coin;
     enemy;
@@ -132,6 +132,7 @@ class PlayGame extends Phaser.Scene {
     layer1;
     plataform1;
     plataform2;
+
     addCollider = true;
     isGameOver = false;
     isInvencible = false;
@@ -144,10 +145,11 @@ class PlayGame extends Phaser.Scene {
         this.score = 0;
         this.startTime = 0;
         this.lives = 3;
+
         if(this.isRestart){
             this.startTime = this.time.now;
         }
-
+        // coin positions
         var coinPositions = [
             { x: 300, y: 100 },
             { x: 397, y: 80 },
@@ -170,7 +172,6 @@ class PlayGame extends Phaser.Scene {
             { x: 550, y: 270 },
             { x: 600, y: 470 },
             { x: 850, y: 400 },
-
             { x: 2300, y: 690 },
             { x: 2118, y: 600 },
             { x: 1870, y: 630 },
@@ -194,7 +195,7 @@ class PlayGame extends Phaser.Scene {
             { x: 2134, y: 95 },
             { x: 1934, y: 65 },
         ];
-
+        // enemy positions
         var enemyPositions = [
             { x: 442, y: 258 },
             { x: 90, y: 690 },
@@ -207,12 +208,13 @@ class PlayGame extends Phaser.Scene {
             { x: 1740, y:  689},
             { x: 1975, y:  113},
         ];
+        // platform positions
         this.platform1 = this.physics.add.staticGroup();
         this.platform1.create(400, 875, 'over').setScale(2).refreshBody();
         this.platform2 = this.physics.add.staticGroup();
         this.platform2.create(2200, 875, 'over').setScale(2).refreshBody();
 
-
+        // add sound
         this.soundFx = this.sound.add('coinSound');
         this.soundFx = this.sound.add('jumpSound');
         this.soundFx = this.sound.add('lvlupSound');
@@ -226,35 +228,38 @@ class PlayGame extends Phaser.Scene {
             this.playedMusic = true;
         }
      
-        
-
+        // flag positions
         this.flag = this.physics.add.sprite(770, 650, "flag");
         this.flag2 = this.physics.add.sprite(1728, 90, "flag2");
-
-        // cria um objeto de teclas de seta
+        
+        // cursor type 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        // codigo de implementação do tilemap e tileset no ecrã
+        // add map and tileset
         this.map = this.make.tilemap({ key: "level" });
         const tile = this.map.addTilesetImage("tileset01", "tile");
 
-        // blocos cujo player colide ao pousar
+        // set collisions
         this.map.setCollisionBetween(16, 17);
         this.map.setCollisionBetween(21, 22);
         this.map.setCollisionBetween(27, 28);
         this.map.setCollision(40);
 
+        // add tile map layer as game layer
         this.layer1 = this.map.createStaticLayer("layer01", tile);
 
+        // add mario and world collider
         this.mario = this.physics.add.sprite(90, 150, "mario");
         this.mario.body.velocity.x = 0;
         this.mario.body.velocity.y = 0;
         this.mario.body.gravity.y = gameOptions.playerGravity;
         this.mario.setCollideWorldBounds(false);
 
+        // add mario-follow-camera 
         this.cameras.main.setBounds(0, 0, 4000, 4000);
         this.cameras.main.startFollow(this.mario);
         
+        // add textBoard (timer - score - lives)
         this.timerText = this.add.text(25, 40, '', { fontFamily: 'Suez One', 
             fontWeight: 'bold', 
             fontWeight: '900', 
@@ -273,13 +278,14 @@ class PlayGame extends Phaser.Scene {
             fontSize: '20px',
             fill: '#000' }).setScrollFactor(0);
 
+        // add colliders w/mario
         this.physics.add.collider(this.mario, this.layer1);
         this.physics.add.collider(this.mario, this.flag, this.nxtLvl, null, this);
         this.physics.add.collider(this.mario, this.flag2, this.finishGame, null, this);
-
         this.physics.add.collider(this.mario, this.platform1, this.outGame1, null, this);
         this.physics.add.collider(this.mario, this.platform2, this.outGame2, null, this);
 
+        // add mario/coin sprite animations
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('mario', { start: 1, end: 2 }),
@@ -306,7 +312,8 @@ class PlayGame extends Phaser.Scene {
             frameRate: 5,
             repeat: -1
         });
-
+        
+        // add function of collider/positions to enemy & coin
         coinPositions.forEach((position) => {
             var coin = this.physics.add.sprite(position.x, position.y, 'coin');
             coin.setBounce(1);
@@ -321,16 +328,10 @@ class PlayGame extends Phaser.Scene {
             this.physics.add.collider(this.mario, enemy, this.loselive, null, this);
             enemy.setImmovable(true);
           }, this); 
-
+        
+        // cheat codes (score += 1000 | tp lvl2)
         this.input.keyboard.on('keydown_M', function (event) {
-            this.mario.x = 650;
-            this.mario.y = 700;
-            this.cameras.main.startFollow(this.mario);
-        }, this);
-
-        this.input.keyboard.on('keydown_P', function (event) {
-            this.mario.x = 1828;
-            this.mario.y = 100;
+            this.nxtLvl();
             this.cameras.main.startFollow(this.mario);
         }, this);
 
@@ -343,14 +344,18 @@ class PlayGame extends Phaser.Scene {
     }
 
     update() {
+        console.log(this.mario.x, this.mario.y);
+
         if (this.isGameOver){
           return;
         }
             this.timeElapsed = ((this.time.now - this.startTime) / 1000).toFixed(2);
             this.timerText.setText(`Time: ${this.timeElapsed}`);
+
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown ){
                 this.mario.setVelocityY(300);
         }  
+        // call the sprite animations when clicking the respective letter
         if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) {
             this.mario.body.velocity.x = -gameOptions.playerSpeed;
             this.mario.anims.play('left', true);
@@ -369,13 +374,14 @@ class PlayGame extends Phaser.Scene {
         }
         
     }
-
+    // function getCoin
     getcoin(mario, coin) {
         coin.destroy();
         this.score += 100;
         this.scoreText.setText('Score: ' + this.score);
         this.sound.play('coinSound', { volume: 0.025 });
     }
+    // functions gameOver platforms
     outGame1() {
         this.mario.x = 90;
         this.mario.y = 150;
@@ -390,6 +396,7 @@ class PlayGame extends Phaser.Scene {
         this.sound.play('losseLiveSound', { volume: 0.025 });
         this.loselive();
     }
+    // function lose live
     loselive(){
         if (!this.soundPlayed) {
             this.a.play();
@@ -411,6 +418,7 @@ class PlayGame extends Phaser.Scene {
             }
         }
     }
+    // function next level
     nxtLvl(mario, flag) {
         this.mario.x = 2380;
         this.mario.y = 690;
@@ -426,6 +434,7 @@ class PlayGame extends Phaser.Scene {
             this.lives = 3;
             this.scoreTextlives.setText('Lives: ' + this.lives);
     }
+    // function finish game
     finishGame(mario, flag2){ 
         this.scene.start('gameover');
         this.isGameOver = true;
